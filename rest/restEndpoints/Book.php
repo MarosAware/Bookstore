@@ -1,4 +1,5 @@
 <?php
+
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $books = Book::loadAll($conn, isset($pathId) ? $pathId : null);
     $jsonBooks = [];
@@ -7,9 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
     $response = ['success' => $jsonBooks];
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    parse_str(file_get_contents("php://input"), $postVars);
     $book = new Book($conn);
-    $book->setTitle($_POST['title']);
-    $book->setDescription($_POST['description']);
+    $book->setTitle($postVars['title']);
+    $book->setDescription($postVars['description']);
 
     $book->save();
 

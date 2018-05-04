@@ -15,6 +15,7 @@ try {
     $response = ['error' => 'DB Connection error: '.$e->getMessage()];
 }
 
+
 ######### Dynamic load php class file depend on request #########
 //parsing url
 //if request URI is rest.php/book/1
@@ -43,7 +44,11 @@ if (!isset($response['error'])) {//process request if no db error
 header('Content-Type: application/json');//return json header
 
 if (isset($response['error'])) {
-    header("HTTP/1.0 400 Bad Request");//return proper http code if error
+    if (strpos($response['error'], 'DB Connection error') !== false) {
+        header("HTTP/1.0 500 Internal Server Error");//return proper http code if connection failed
+    } else {
+        header("HTTP/1.0 400 Bad Request");//return proper http code if error
+    }
 }
 
 echo json_encode($response);
