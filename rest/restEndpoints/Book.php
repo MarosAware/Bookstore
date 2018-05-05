@@ -10,8 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
     parse_str(file_get_contents("php://input"), $postVars);
     $book = new Book($conn);
+
     $book->setTitle($postVars['title']);
     $book->setDescription($postVars['description']);
+    $book->setAuthorId($postVars['author_id']);
 
     $book->save();
 
@@ -21,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $bookToEdit = Book::loadAll($conn, $pathId)[0];
     $bookToEdit->setTitle($patchVars['title']);
     $bookToEdit->setDescription($patchVars['description']);
+    $bookToEdit->setAuthorId($patchVars['author_id']);
 
     $bookToEdit->save();
 
