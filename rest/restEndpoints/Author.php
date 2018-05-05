@@ -7,9 +7,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
     $response = ['success' => $jsonAuthors];
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    parse_str(file_get_contents("php://input"), $patchVars);
     $author = new Author($conn);
-    $author->setName($_POST['name']);
-    $author->setSurname($_POST['surname']);
+    $author->setName($patchVars['name']);
+    $author->setSurname($patchVars['surname']);
 
     $author->save();
 

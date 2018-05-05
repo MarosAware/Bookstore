@@ -68,7 +68,6 @@ form.on('submit', function (event) {
             description: description
         };
 
-
         $.ajax({
             url: 'http://localhost/Bookstore/rest/rest.php/book/',
             method: 'POST',
@@ -115,8 +114,11 @@ $(function() {
                 contentType: "application/json",
                 dataType: "json"
             }).done(function(data) {
-                $(itemBook).remove();
-                optionToRemove.remove();
+
+                if (data.success === 'deleted') {
+                    $(itemBook).remove();
+                    optionToRemove.remove();
+                }
 
             }).fail(function() {
                 showModal('Something goes wrong. Sorry.');
@@ -157,53 +159,54 @@ $(function() {
             });
 
             editBook.slideDown();
+
+            //Submit edit form
+            editBook.on('submit', function(event) {
+                event.preventDefault();
+
+                var idBook = editBook.find('#id').val();
+                var titleBook = editBook.find('#title').val();
+                var descBook = editBook.find('#description').val();
+
+                //Reset select input into default position
+                bookEditSelect.val("");
+
+                editBook.slideUp();
+
+                var data = {
+                    title: titleBook,
+                    description: descBook
+                };
+
+                $.ajax({
+                    url: 'http://localhost/Bookstore/rest/rest.php/book/'+idBook,
+                    method: 'PATCH',
+                    data: data,
+                    contentType: "application/json",
+                    dataType: "json"
+                }).done(function() {
+
+                    //Clear input after edit
+                    editBook.find('#id').val('');
+                    editBook.find('#title').val('');
+                    editBook.find('#description').val('');
+
+                    //Change existing book after edit
+                    var bookToEditDisplay = $('#booksList').find(`button[data-id='${idBook}']`).eq(0);
+                    var selectOptionToEdit = bookEditSelect.find(`[value='${idBook}']`);
+
+                    bookToEditDisplay.prev().text(titleBook);
+                    bookToEditDisplay.parent().parent().find('.book-description').text(descBook);
+
+                    selectOptionToEdit.text(titleBook);
+
+                }).fail(function() {
+                    showModal('Sorry, you can\'t edit book right now, try again later.');
+                });
+            });
         } else {
             editBook.slideUp();
         }
-
-        editBook.on('submit', function(event) {
-            event.preventDefault();
-
-            var idBook = editBook.find('#id').val();
-            var titleBook = editBook.find('#title').val();
-            var descBook = editBook.find('#description').val();
-
-            //Reset select input into default position
-            bookEditSelect.val("");
-
-            editBook.slideUp();
-
-            var data = {
-                title: titleBook,
-                description: descBook
-            };
-
-            $.ajax({
-                url: 'http://localhost/Bookstore/rest/rest.php/book/'+idBook,
-                method: 'PATCH',
-                data: data,
-                contentType: "application/json",
-                dataType: "json"
-            }).done(function() {
-
-                //Clear input after edit
-                editBook.find('#id').val('');
-                editBook.find('#title').val('');
-                editBook.find('#description').val('');
-
-                //Change existing book after edit
-                var bookToEditDisplay = $('#booksList').find(`button[data-id='${idBook}']`).eq(0);
-                var selectOptionToEdit = bookEditSelect.find(`[value='${idBook}']`);
-
-                bookToEditDisplay.prev().text(titleBook);
-                bookToEditDisplay.parent().parent().find('.book-description').text(descBook);
-
-                selectOptionToEdit.text(titleBook);
-
-            }).fail(function() {
-                showModal('Sorry, you can\'t edit book right now, try again later.');
-            });
-        });
 
     });
 
