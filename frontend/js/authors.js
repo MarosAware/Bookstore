@@ -1,23 +1,40 @@
 //http://localhost/Bookstore/rest/rest.php/author/1
 
 var authorEditSelect = $('#authorEditSelect');
+var authorBookList = $('.authorBooksList');
 
 
-//Function to add author
+//Function to add author with all his books
 function addAuthor(data) {
     for (var i = 0; i < data.success.length; i++) {
 
-        var newAuthor = $(`
-        <li class="list-group-item">
-            <div class="panel panel-default">
-                <div class="panel-heading"><span class="authorTitle">${data.success[i].name + ' ' + data.success[i].surname}</span>
-                    <button data-id="${data.success[i].id}" class="btn btn-danger pull-right btn-xs btn-author-remove"><i
-                    class="fa fa-trash"></i></button>
-                </div>
-            </div>
-        </li>`);
+        var newAuthor = `
+                    <li class="list-group-item">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><span class="authorTitle">${data.success[i].name + ' ' + data.success[i].surname}</span>
+                                <button data-id="${data.success[i].id}" class="btn btn-danger pull-right btn-xs btn-author-remove"><i
+                                            class="fa fa-trash"></i></button>
+                                <button data-id="${data.success[i].id}" class="btn btn-primary pull-right btn-xs btn-author-books"><i
+                                            class="fa fa-book"></i></button>
+
+                            </div>
+                            <ul class="authorBooksList"></ul>
+                        </div>
+                    </li>`;
+
 
         $('#authorsList').append(newAuthor);
+
+        //if not null, empty, false etc.
+        //because if we add new author, he doesn't have any books
+        if (data.success[i].books) {
+            for (var j = 0; j < data.success[i].books.length; j++) {
+                var newBook = `<li>${data.success[i].books[j].title}</li>`;
+
+                $('#authorsList').find(`[data-id='${data.success[i].id}']`).parent().next().append(newBook);
+            }
+        }
+
     }
 }
 
@@ -29,10 +46,9 @@ function addOption(data) {
     }
 }
 
+
 //Adding new author from form
-
 var addForm = $('#authorAdd');
-
 
 addForm.on('submit', function(event) {
     event.preventDefault();
@@ -110,6 +126,14 @@ $(function() {
         }
     });
 
+    //Show author books
+
+    authorList.on('click', 'button.btn-author-books', function() {
+       var elementToAppend = $(this).parent().next();
+       elementToAppend.slideToggle();
+    });
+
+
 
     //Edit author
     authorEditSelect.on('change', function() {
@@ -119,7 +143,7 @@ $(function() {
         //Only if author id is not empty
         if (authorId !== '') {
 
-            //Get author by id
+            //Get author by id and fill edit input
             $.ajax({
                 url: 'http://localhost/Bookstore/rest/rest.php/author/' + authorId,
                 method: 'GET',
@@ -151,6 +175,7 @@ $(function() {
 
                 authorEdit.slideUp();
 
+
                 var data = {
                     name: inpName,
                     surname: inpSurname
@@ -165,12 +190,13 @@ $(function() {
                 }).done(function() {
 
                     //Clear input
+                    authorEdit.find('#id').val('');
                     authorEdit.find('#name').val('');
                     authorEdit.find('#surname').val('');
 
-                    //Changing existing author on the list after edit
 
-                    var authorToEditDisplay = $('#authorsList').find(`button[data-id='${authorId}']`).prev();
+                    //Changing existing author on the list after edit
+                    var authorToEditDisplay = $('#authorsList').find(`button[data-id='${authorId}']`).prev().eq(0);
                     var selectOptionToEdit = authorEditSelect.find(`[value='${authorId}']`);
 
                     authorToEditDisplay.text(inpName + ' ' + inpSurname);

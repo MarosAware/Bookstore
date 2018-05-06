@@ -94,7 +94,7 @@ class Book implements JsonSerializable
         }
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
-
+        
         $books = $stmt->fetchAll(PDO::FETCH_OBJ);
         $booksList = [];
 
